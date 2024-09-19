@@ -1,5 +1,5 @@
 import { createNoise2D } from 'simplex-noise'
-import { HEIGHT, WIDTH } from '../../utils/constant/chunk'
+import { HEIGHT, WIDTH } from '../../utils/config/chunk'
 import alea from 'alea';
 
 const prng = alea('seed');

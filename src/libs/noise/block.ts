@@ -1,6 +1,6 @@
 import Alea from "alea";
 import { createNoise3D } from "simplex-noise";
-import { HEIGHT, WIDTH } from "../../utils/constant/chunk";
+import { HEIGHT, WIDTH } from "../../utils/config/chunk";
 
 type NaturalBlockCharactersticsType = {
     width?: number

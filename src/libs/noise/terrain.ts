@@ -1,4 +1,4 @@
-import { HEIGHT, WIDTH } from "../../utils/constant/chunk";
+import { HEIGHT, WIDTH } from "../../utils/config/chunk";
 import simplex2DNoise from "./simplex-2d";
 
 export function generateChunkNoise() {

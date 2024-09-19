@@ -1,11 +1,11 @@
 import * as THREE from "three"
-import { PERSPECTIVE_CAMERA_FAR, PERSPECTIVE_CAMERA_FOV, PERSPECTIVE_CAMERA_NEAR } from "../../utils/constant/cameras";
+import { PERSPECTIVE_CAMERA_FAR, PERSPECTIVE_CAMERA_FOV, PERSPECTIVE_CAMERA_NEAR } from "../../utils/config/cameras";
 
 
 
 export function setupCamera() {
     const camera = new THREE.PerspectiveCamera(PERSPECTIVE_CAMERA_FOV, window.innerWidth / window.innerHeight, PERSPECTIVE_CAMERA_NEAR, PERSPECTIVE_CAMERA_FAR);
-    camera.position.set(20, 20, -30)
+    camera.position.set(0, 40,100)
     return camera;
 }
 

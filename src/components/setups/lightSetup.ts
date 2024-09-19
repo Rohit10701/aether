@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { INTENSITY, AMBIENT_INTENSITY } from "../../utils/constant/lights";
+import { INTENSITY, AMBIENT_INTENSITY } from "../../utils/config/lights";
 type  SetupLightTypes =  {
     scene : THREE.Scene, 
     color? : number
@@ -7,7 +7,7 @@ type  SetupLightTypes =  {
 export default function setupLight({scene , color = 0xFFFFFF} : SetupLightTypes){
     const intensity = 3;
     const light = new THREE.DirectionalLight( color, intensity );
-    light.position.set( - 10, 20, 40 );
+    light.position.set(  200, 200, 200 );
     scene.add( light );
 }
 

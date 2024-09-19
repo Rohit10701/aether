@@ -76,6 +76,9 @@ import * as THREE from 'three'
 type VoxelChunkTypes = {
 	chunkWidth: number
 	chunkHeight: number
+	tileSize?: number
+	tileTextureWidth?: number
+	tileTextureHeight?: number
 }
 
 type LocalVoxelCoordinateType = {
@@ -94,11 +97,16 @@ export class VoxelChunk {
 	chunkWidth: number
 	chunkHeight: number
 	chunkData: Uint8Array // Store multiple chunks based on their chunk ids
-
-	constructor({ chunkWidth, chunkHeight }: VoxelChunkTypes) {
+	// tileSize: number
+	// tileTextureWidth: number
+	// tileTextureHeight: number
+	constructor({ chunkWidth, chunkHeight, tileSize, tileTextureWidth, tileTextureHeight }: VoxelChunkTypes) {
 		this.chunkWidth = chunkWidth
 		this.chunkHeight = chunkHeight
 		this.chunkData = new Uint8Array(this.chunkWidth * this.chunkHeight * this.chunkWidth) // use to store info of each chunk voxel with their coordinates as keys
+		// this.tileSize = tileSize;
+		// this.tileTextureWidth = tileTextureWidth;
+		// this.tileTextureHeight =tileTextureHeight;
 	}
 
 	// Get the chunk data for the given voxel absolute coordinates
@@ -184,11 +192,11 @@ export class VoxelChunk {
 								voxelLocalCordZ: voxelZ + normal[2]
 							})
 
-							const isVoxelOnChunkBorder = this.isVoxelOnChunkBorder({
-								voxelLocalCordX: voxelX + normal[0],
-								voxelLocalCordY: voxelY + normal[1],
-								voxelLocalCordZ: voxelZ + normal[2]
-							})
+							// const isVoxelOnChunkBorder = this.isVoxelOnChunkBorder({
+							// 	voxelLocalCordX: voxelX + normal[0],
+							// 	voxelLocalCordY: voxelY + normal[1],
+							// 	voxelLocalCordZ: voxelZ + normal[2]
+							// })
 							if (!neighboringVoxel || neighboringVoxel != voxel) {
 								// since this normal has no neighbour, we need to create a face to render
 								const ndx = localVoxelCoordinates.length / 3

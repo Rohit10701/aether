@@ -80,7 +80,7 @@ function createVoxelMesh(
 	texture.minFilter = THREE.NearestFilter;
 	texture.magFilter = THREE.NearestFilter
 	
-	const material = new THREE.MeshStandardMaterial({
+	const material = new THREE.MeshPhongMaterial({
 		map: texture
 	})
 	
@@ -286,22 +286,22 @@ function createBlockWithNoise(naturalBlockNoiseData : boolean[][][], voxelChunk 
 //     return uv;
 // }
 
-function getUVCoordinates(row: number, col: number, totalRows: number, totalCols: number): [number, number][] {
-    // Calculate the width and height of each cell
-    const cellWidth = 1 / totalCols;
-    const cellHeight = 1 / totalRows;
+// function getUVCoordinates(row: number, col: number, totalRows: number, totalCols: number): [number, number][] {
+//     // Calculate the width and height of each cell
+//     const cellWidth = 1 / totalCols;
+//     const cellHeight = 1 / totalRows;
 
-    // Calculate the normalized coordinates
-    const left = col * cellWidth;
-    const right = (col + 1) * cellWidth;
-    const top = 1 - row * cellHeight;
-    const bottom = 1 - (row + 1) * cellHeight;
+//     // Calculate the normalized coordinates
+//     const left = col * cellWidth;
+//     const right = (col + 1) * cellWidth;
+//     const top = 1 - row * cellHeight;
+//     const bottom = 1 - (row + 1) * cellHeight;
 
-    // Return the coordinates of the 4 vertices
-    return [
-        [left, top],    // Top-left
-        [right, top],   // Top-right
-        [left, bottom], // Bottom-left
-        [right, bottom] // Bottom-right
-    ];
-}
+//     // Return the coordinates of the 4 vertices
+//     return [
+//         [left, top],    // Top-left
+//         [right, top],   // Top-right
+//         [left, bottom], // Bottom-left
+//         [right, bottom] // Bottom-right
+//     ];
+// }

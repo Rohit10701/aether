@@ -1,4 +1,4 @@
-const WIDTH = 16
-const HEIGHT =  16
+const WIDTH = 24
+const HEIGHT =  24
 
 export {WIDTH, HEIGHT}

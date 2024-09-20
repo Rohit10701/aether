@@ -6,7 +6,7 @@ type  SetupLightTypes =  {
 }
 export default function setupLight({scene , color = 0xFFFFFF} : SetupLightTypes){
     const intensity = 3;
-    const light = new THREE.DirectionalLight( color, intensity );
+    const light = new THREE.AmbientLight( color, 1 );
     light.position.set(  200, 200, 200 );
     scene.add( light );
 }

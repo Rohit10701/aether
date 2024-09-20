@@ -72,6 +72,7 @@ Voxel Coordinates = (16-31x, 0-15y, 0-15z)
 */
 
 import * as THREE from 'three'
+import { BlockTextureConfig, BlockTypeIdMapper } from '../utils/config/blocks'
 
 type VoxelChunkTypes = {
 	chunkWidth: number
@@ -168,64 +169,76 @@ export class VoxelChunk {
 	}
 
 	// Generate geometry data for the current voxel
-	generateVoxelProperty() {
-		const localVoxelCoordinates = [] // voxel coordinates local to beginning of current chunk
-		const normals = []
-		const facesVertixPosition = []
-		const uvs = []
-		const voxelTypes = []
+	generateVoxelProperty(atlasRows: number, atlasCols: number) {
+        const localVoxelCoordinates: number[] = [];
+        const normals: number[] = [];
+        const facesVertixPosition: number[] = [];
+        const uvs: number[] = [];
+        const voxelTypes = this.chunkData;
 
-		for (let voxelY = 0; voxelY < this.chunkHeight; voxelY++) {
-			for (let voxelZ = 0; voxelZ < this.chunkWidth; voxelZ++) {
-				for (let voxelX = 0; voxelX < this.chunkWidth; voxelX++) {
-					// voxelX, voxelY, voxelZ are absolute coordinates of individual voxel
-					const voxel = this.getVoxel({
-						voxelLocalCordX: voxelX,
-						voxelLocalCordY: voxelY,
-						voxelLocalCordZ: voxelZ
-					})
-					if (voxel) {
-						for (const { normal, vertexPosition, uv } of this.faces) {
-							const neighboringVoxel = this.getVoxel({
-								voxelLocalCordX: voxelX + normal[0],
-								voxelLocalCordY: voxelY + normal[1],
-								voxelLocalCordZ: voxelZ + normal[2]
-							})
+        for (let voxelY = 0; voxelY < this.chunkHeight; voxelY++) {
+            for (let voxelZ = 0; voxelZ < this.chunkWidth; voxelZ++) {
+                for (let voxelX = 0; voxelX < this.chunkWidth; voxelX++) {
+                    const voxel = this.getVoxel({
+                        voxelLocalCordX: voxelX,
+                        voxelLocalCordY: voxelY,
+                        voxelLocalCordZ: voxelZ
+                    });
 
-							// const isVoxelOnChunkBorder = this.isVoxelOnChunkBorder({
-							// 	voxelLocalCordX: voxelX + normal[0],
-							// 	voxelLocalCordY: voxelY + normal[1],
-							// 	voxelLocalCordZ: voxelZ + normal[2]
-							// })
-							if (!neighboringVoxel || neighboringVoxel != voxel) {
-								// since this normal has no neighbour, we need to create a face to render
-								const ndx = localVoxelCoordinates.length / 3
-								for (const pos of vertexPosition) {
-									localVoxelCoordinates.push(pos[0] + voxelX, pos[1] + voxelY, pos[2] + voxelZ)
-									normals.push(...normal)
-								}
-								for (const uvCord of uv) {
-									uvs.push(...uvCord)
-								}
+                    if (voxel && voxel !== 0) {
+                        for (const [faceIndex, { normal, vertexPosition, uv }] of this.faces.entries()) {
+                            const neighboringVoxel = this.getVoxel({
+                                voxelLocalCordX: voxelX + normal[0],
+                                voxelLocalCordY: voxelY + normal[1],
+                                voxelLocalCordZ: voxelZ + normal[2]
+                            });
 
-								const voxelOffset =
-									voxelY * this.chunkWidth * this.chunkWidth + voxelZ * this.chunkWidth + voxelX
-								voxelTypes.push(this.chunkData[voxelOffset])
-								facesVertixPosition.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3)
-							}
-						}
-					}
-				}
-			}
-		}
+                            if (!neighboringVoxel) {
+                                const ndx = localVoxelCoordinates.length / 3;
+                                for (const pos of vertexPosition) {
+                                    localVoxelCoordinates.push(pos[0] + voxelX, pos[1] + voxelY, pos[2] + voxelZ);
+                                    normals.push(...normal);
+                                }
+                                
+                                // Instead of using the default UV coordinates, we'll calculate them based on the voxel type
+                                    const textureAtlasCord = BlockTextureConfig[BlockTypeIdMapper[voxel]];
+                                    const [x, y] = textureAtlasCord[faceIndex];
+                                    const uvForFace = this.getUVCoordinates(x, y, atlasRows, atlasCols);
+                                    uvs.push(...uvForFace.flat());
+								                      
+
+                                facesVertixPosition.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 		return {
-			localVoxelCoordinates,
-			normals,
-			facesVertixPosition,
-			uvs,
-			voxelTypes
-		}
+            localVoxelCoordinates,
+            normals,
+            facesVertixPosition,
+            uvs,
+            voxelTypes
+        };
 	}
+
+	private getUVCoordinates(row: number, col: number, totalRows: number, totalCols: number): [number, number][] {
+        const cellWidth = 1 / totalCols;
+        const cellHeight = 1 / totalRows;
+
+        const left = col * cellWidth;
+        const right = (col + 1) * cellWidth;
+        const top = 1 - row * cellHeight;
+        const bottom = 1 - (row + 1) * cellHeight;
+
+        return [
+            [left, top],    // Top-left
+            [right, top],   // Top-right
+            [left, bottom], // Bottom-left
+            [right, bottom] // Bottom-right
+        ];
+    }
 
 	// Set a voxel's value in chunk
 	setVoxel(

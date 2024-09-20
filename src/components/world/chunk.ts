@@ -26,19 +26,19 @@ export function createObjects({ scene, width = WIDTH, height = HEIGHT }: createO
 
 	console.time("createChunkWithNoise")
 	createChunkWithNoise(chunkNoiseData, voxelChunk) // default block is stone with id = 1
+	createBlockWithNoise(stoneNoiseData, voxelChunk, 2)
 	console.timeEnd("createChunkWithNoise")
 
-	createBlockWithNoise(stoneNoiseData, voxelChunk, 2)
 	// console.log(voxelChunk.chunkData.filter(data => data ==2 ))
 	// Generate voxel geometry based on the voxel dat
 
 	console.time("voxelGeometry")
-	const voxelGeometry = voxelChunk.generateVoxelProperty()
+	const voxelGeometry = voxelChunk.generateVoxelProperty(3, 2)
 	console.timeEnd("voxelGeometry")
 
 	// Create voxel mesh with different textures
 	console.time("voxelMesh")
-	const voxelMesh = createVoxelMesh(voxelGeometry, 2, 6, "/src/assets/textureAtlas.png")
+	const voxelMesh = createVoxelMesh(voxelGeometry, 3, 2, "/src/assets/textureAtlas.png")
 	console.timeEnd("voxelMesh")
 
 	scene.add(voxelMesh)
@@ -59,52 +59,34 @@ function createVoxelMesh(
 		normals: number[]
 		facesVertixPosition: number[]
 		uvs: number[]
-		voxelTypes: number[] // Array holding voxel types for each voxel
+		voxelTypes: Uint8Array // Array holding voxel types for each voxel
 	},
 	atlasRows: number,    // Number of rows in the atlas
 	atlasCols: number,    // Number of columns in the atlas
 	textureAtlasURL: string // URL for the texture atlas
 ) {
-	const { localVoxelCoordinates, normals, facesVertixPosition, voxelTypes } = voxelGeometry
+	const { localVoxelCoordinates, normals, facesVertixPosition, voxelTypes, uvs } = voxelGeometry
 
 	const geometry = new THREE.BufferGeometry()
 
 	const vertices = new Float32Array(localVoxelCoordinates)
 	const indices = new Uint16Array(facesVertixPosition)
-
+	
 	geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
 	geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3))
-	geometry.setIndex(new THREE.BufferAttribute(indices, 1))
-
+	
 	// Load the texture atlas
 	const texture = new THREE.TextureLoader().load(textureAtlasURL)
 	texture.minFilter = THREE.NearestFilter;
 	texture.magFilter = THREE.NearestFilter
-
+	
 	const material = new THREE.MeshStandardMaterial({
 		map: texture
 	})
-
-	// Now we need to generate UVs for each face of each voxel
-	const uvsArray : number[] = []
-
-	voxelTypes.forEach((voxelType, voxelIndex) => {
-		// Assuming each voxel has 6 faces (front, back, left, right, top, bottom)
-		let textureAtlasCord = BlockTextureConfig[BlockTypeIdMapper[voxelType]]
-		for (let faceIndex = 0; faceIndex < 6; faceIndex++) {
-			const [x, y] = textureAtlasCord[faceIndex]
-			const uvForFace = getUVCoordinates(x, y, 3, 2)
-
-			// Push the UV coordinates for this face into the uvsArray
-			// We need to add UVs for 4 vertices of the face
-			uvForFace.forEach(uv => {
-				uvsArray.push(...uv)  // Flatten the UV array and add to uvsArray
-			})
-		}
-	})
-
+	
 	// Set the UVs for the geometry
-	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvsArray), 2))
+	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2))
+	geometry.setIndex(new THREE.BufferAttribute(indices, 1))
 
 	// Create the mesh
 	const mesh = new THREE.Mesh(geometry, material)
@@ -305,21 +287,21 @@ function createBlockWithNoise(naturalBlockNoiseData : boolean[][][], voxelChunk 
 // }
 
 function getUVCoordinates(row: number, col: number, totalRows: number, totalCols: number): [number, number][] {
-    // Calculate the width and height of each cell in the UV space
-    const colWidth = 1 / totalCols;
-    const rowHeight = 1 / totalRows;
-    
-    // Calculate the UV coordinates for the bottom-left and top-right corners
-    const x0 = col * colWidth;             // Bottom-left x
-    const x1 = (col + 1) * colWidth;       // Top-right x
-    const y0 = 1 - (row + 1) * rowHeight;  // Bottom-left y (note Y is inverted in UV)
-    const y1 = 1 - row * rowHeight;        // Top-right y
+    // Calculate the width and height of each cell
+    const cellWidth = 1 / totalCols;
+    const cellHeight = 1 / totalRows;
 
-    // Return UV coordinates in order: bottom-left, bottom-right, top-left, top-right
+    // Calculate the normalized coordinates
+    const left = col * cellWidth;
+    const right = (col + 1) * cellWidth;
+    const top = 1 - row * cellHeight;
+    const bottom = 1 - (row + 1) * cellHeight;
+
+    // Return the coordinates of the 4 vertices
     return [
-        [x0, y0],  // bottom-left
-        [x1, y0],  // bottom-right
-        [x0, y1],  // top-left
-        [x1, y1]   // top-right
+        [left, top],    // Top-left
+        [right, top],   // Top-right
+        [left, bottom], // Bottom-left
+        [right, bottom] // Bottom-right
     ];
 }

@@ -7,6 +7,7 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import setupLight from "./components/setups/lightSetup";
 import { createObjects } from "./components/world/chunk";
+import { Player } from "./game/player";
 
 const canvas = document.getElementById('__canvas') as HTMLCanvasElement;
 
@@ -21,18 +22,21 @@ scene.background = new THREE.Color( 'lightblue' );
 const camera = setupCamera();
 setupLight({scene});
 
+const player = new Player({scene, camera, renderer })
+
 createObjects({scene});
 
-const controls = new OrbitControls( camera, renderer.domElement );
+// const controls = new OrbitControls( camera, renderer.domElement );
 
 window.addEventListener('resize', () => handleResize(renderer, camera));
 document.body.append(stats.dom);
 
-controls.update();
+// controls.update();
 
 function animate() {
+  player.update()
     requestAnimationFrame(animate);
-    controls.update();
+    // controls.update();
     renderer.render(scene, camera);
     stats.update();
 }
